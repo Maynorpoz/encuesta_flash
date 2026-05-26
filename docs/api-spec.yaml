@@ -1,0 +1,272 @@
+openapi: 3.0.3
+info:
+  title: Votify API - Sistema de Encuestas Serverless
+  description: Especificación de la API expuesta por el API Gateway y ejecutada mediante Funciones Serverless (AWS Lambda).
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+    description: Servidor de Desarrollo Local (Emulador)
+paths:
+  /auth/register:
+    post:
+      summary: Registro de nuevos creadores de encuestas
+      description: Registra un usuario y genera un token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  minimum: 3
+                password:
+                  type: string
+                  minimum: 6
+      responses:
+        '201':
+          description: Usuario registrado con éxito.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      username:
+                        type: string
+        '400':
+          description: Parámetros inválidos.
+        '409':
+          description: El usuario ya existe.
+
+  /auth/login:
+    post:
+      summary: Inicio de sesión de creadores de encuestas
+      description: Valida credenciales de usuario y entrega un token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Inicio de sesión exitoso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      username:
+                        type: string
+        '401':
+          description: Credenciales inválidas.
+
+  /polls:
+    post:
+      summary: Crear una nueva encuesta (Protegido)
+      description: Crea una encuesta con opciones personalizadas. Requiere Token en el encabezado Authorization.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - options
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                options:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 2
+                  maxItems: 10
+                settings:
+                  type: object
+                  properties:
+                    multipleChoice:
+                      type: boolean
+                    anonymous:
+                      type: boolean
+      responses:
+        '201':
+          description: Encuesta creada exitosamente.
+        '400':
+          description: Datos de entrada inválidos.
+        '401':
+          description: Token ausente.
+        '403':
+          description: Token inválido.
+
+  /polls/me:
+    get:
+      summary: Obtener encuestas creadas por el usuario autenticado (Protegido)
+      description: Retorna un listado de todas las encuestas creadas por el usuario.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Listado obtenido con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    totalVotes:
+                      type: integer
+                    createdAt:
+                      type: string
+
+  /polls/{pollId}:
+    get:
+      summary: Obtener metadatos públicos de una encuesta
+      description: Retorna la pregunta y las opciones disponibles (no incluye el conteo de votos).
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalles de la encuesta.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  options:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        text:
+                          type: string
+        '404':
+          description: La encuesta no existe.
+
+  /polls/vote:
+    post:
+      summary: Registrar un voto
+      description: Registra un voto para una opción en una encuesta específica.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pollId
+                - optionId
+                - voterId
+              properties:
+                pollId:
+                  type: string
+                optionId:
+                  type: string
+                voterId:
+                  type: string
+      responses:
+        '201':
+          description: Voto registrado con éxito. Dispara un evento en tiempo real.
+        '400':
+          description: Parámetros inválidos u opción incorrecta.
+        '409':
+          description: El votante ya registró un voto (para encuestas de opción única).
+
+  /polls/{pollId}/results:
+    get:
+      summary: Obtener resultados de una encuesta
+      description: Retorna los resultados agregados y porcentajes de votos de cada opción.
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resultados agregados de votación.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pollId:
+                    type: string
+                  title:
+                    type: string
+                  totalVotes:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        optionId:
+                          type: string
+                        text:
+                          type: string
+                        votes:
+                          type: integer
+                        percentage:
+                          type: integer
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
