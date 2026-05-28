@@ -1,0 +1,10 @@
+{
+  "name": "encuesta-flash-scripts",
+  "version": "1.0.0",
+  "description": "Utility scripts for Encuesta Flash SAM project",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1055.0",
+    "@aws-sdk/lib-dynamodb": "^3.1055.0"
+  }
+}

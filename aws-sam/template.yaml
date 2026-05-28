@@ -1,0 +1,159 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Encuesta Flash (Votify) - Sistema de Encuestas en Tiempo Real
+  Arquitectura Serverless con AWS Lambda, API Gateway y DynamoDB
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref EncuestaFlashTable
+        JWT_SECRET: !Ref JWTSecret
+        NODE_ENV: !Ref Environment
+    Layers:
+      - !Ref SharedLayer
+
+Parameters:
+  Environment:
+    Type: String
+    Default: development
+    AllowedValues:
+      - development
+      - staging
+      - production
+    Description: Environment name
+
+  JWTSecret:
+    Type: String
+    Default: 'secret-key-para-encuestas-serverless-2026'
+    NoEcho: true
+    Description: Secret key for JWT token signing
+
+Resources:
+  # ==========================================
+  # DynamoDB Table - Single Table Design
+  # ==========================================
+  EncuestaFlashTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'EncuestaFlashTable-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        # Primary Key
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        # GSI Attributes
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: creatorId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: S
+        - AttributeName: pollId
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+
+      GlobalSecondaryIndexes:
+        # GSI para buscar usuarios por username
+        - IndexName: UsernameIndex
+          KeySchema:
+            - AttributeName: username
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+        # GSI para buscar polls por creatorId
+        - IndexName: CreatorIndex
+          KeySchema:
+            - AttributeName: creatorId
+              KeyType: HASH
+            - AttributeName: createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+        # GSI para buscar conexiones WebSocket por pollId
+        - IndexName: PollIdIndex
+          KeySchema:
+            - AttributeName: pollId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+      # Habilitar Streams para triggers de broadcast en tiempo real
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+      # TTL para auto-eliminar conexiones WebSocket expiradas
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+      Tags:
+        - Key: Project
+          Value: EncuestaFlash
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ==========================================
+  # Lambda Layer - Dependencias Compartidas
+  # ==========================================
+  SharedLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub 'EncuestaFlashSharedLayer-${Environment}'
+      Description: Shared dependencies for Encuesta Flash Lambda functions
+      ContentUri: layers/shared-layer/
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: Retain
+    Metadata:
+      BuildMethod: nodejs20.x
+
+  # ==========================================
+  # Placeholder para Funciones Lambda
+  # (Se agregarán en Fase 2)
+  # ==========================================
+
+  # Las funciones Lambda se definirán en las siguientes fases:
+  # - Fase 2: Auth Functions (register, login, authorizer)
+  # - Fase 2: Poll Functions (createPoll, getPoll, getUserPolls, vote, getResults)
+  # - Fase 4: WebSocket Functions (connect, disconnect, default, broadcast)
+
+Outputs:
+  DynamoDBTableName:
+    Description: DynamoDB Table Name
+    Value: !Ref EncuestaFlashTable
+    Export:
+      Name: !Sub '${AWS::StackName}-TableName'
+
+  DynamoDBTableArn:
+    Description: DynamoDB Table ARN
+    Value: !GetAtt EncuestaFlashTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-TableArn'
+
+  DynamoDBStreamArn:
+    Description: DynamoDB Stream ARN (for WebSocket broadcast trigger)
+    Value: !GetAtt EncuestaFlashTable.StreamArn
+    Export:
+      Name: !Sub '${AWS::StackName}-StreamArn'
+
+  SharedLayerArn:
+    Description: Lambda Layer ARN
+    Value: !Ref SharedLayer
+    Export:
+      Name: !Sub '${AWS::StackName}-LayerArn'
