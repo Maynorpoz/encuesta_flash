@@ -1,0 +1,12 @@
+{
+  "body": "{\"username\":\"chepe\",\"password\":\"123456\"}",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "httpMethod": "POST",
+  "path": "/auth/login",
+  "requestContext": {
+    "requestId": "test-request-id",
+    "requestTime": "01/Jan/2026:00:00:00 +0000"
+  }
+}

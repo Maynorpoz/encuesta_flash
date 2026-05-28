@@ -1,0 +1,10 @@
+{
+  "name": "auth-functions",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Authentication Lambda functions",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

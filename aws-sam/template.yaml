@@ -124,14 +124,48 @@ Resources:
       BuildMethod: nodejs20.x
 
   # ==========================================
-  # Placeholder para Funciones Lambda
-  # (Se agregarán en Fase 2)
+  # Lambda Functions - Auth
   # ==========================================
 
-  # Las funciones Lambda se definirán en las siguientes fases:
-  # - Fase 2: Auth Functions (register, login, authorizer)
-  # - Fase 2: Poll Functions (createPoll, getPoll, getUserPolls, vote, getResults)
-  # - Fase 4: WebSocket Functions (connect, disconnect, default, broadcast)
+  RegisterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-RegisterFunction'
+      CodeUri: functions/auth/
+      Handler: register.handler
+      Description: User registration with JWT token generation
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref EncuestaFlashTable
+      Tags:
+        Function: Register
+        Phase: '2.1'
+
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-LoginFunction'
+      CodeUri: functions/auth/
+      Handler: login.handler
+      Description: User login with JWT token generation
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref EncuestaFlashTable
+      Tags:
+        Function: Login
+        Phase: '2.1'
+
+  # ==========================================
+  # Placeholder para más funciones Lambda
+  # ==========================================
+
+  # Próximas funciones (Fase 2.2 - 2.3):
+  # - AuthorizerFunction (Lambda Authorizer)
+  # - CreatePollFunction, GetPollFunction, GetUserPollsFunction
+  # - VoteFunction, GetResultsFunction
+  #
+  # Fase 4: WebSocket Functions
+  # - ConnectFunction, DisconnectFunction, DefaultFunction, BroadcastFunction
 
 Outputs:
   DynamoDBTableName:
