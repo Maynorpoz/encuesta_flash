@@ -1,8 +1,12 @@
 // Imports desde Lambda Layer (/opt/nodejs/)
 // Los módulos npm se importan directamente, SAM los encuentra en el layer
 import bcrypt from 'bcryptjs';
-import { db } from '/opt/nodejs/index.mjs';
-import { generateToken } from '/opt/nodejs/index.mjs';
+
+// Determinar ruta de importación según entorno
+const isLocal = process.env.NODE_ENV === 'development' && !process.env.AWS_EXECUTION_ENV;
+const layerPath = isLocal ? '../../layers/shared-layer/nodejs/index.mjs' : '/opt/nodejs/index.mjs';
+
+const { db, generateToken } = await import(layerPath);
 
 /**
  * Lambda Handler - Login de Usuario
