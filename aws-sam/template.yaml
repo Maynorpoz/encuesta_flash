@@ -168,13 +168,83 @@ Resources:
         Phase: '2.2'
 
   # ==========================================
-  # Placeholder para más funciones Lambda
+  # Lambda Functions - Polls CRUD
   # ==========================================
 
-  # Próximas funciones (Fase 2.3):
-  # - CreatePollFunction, GetPollFunction, GetUserPollsFunction
-  # - VoteFunction, GetResultsFunction
-  #
+  CreatePollFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-CreatePollFunction'
+      CodeUri: functions/polls/
+      Handler: createPoll.handler
+      Description: Create new poll (requires authentication)
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref EncuestaFlashTable
+      Tags:
+        Function: CreatePoll
+        Phase: '2.3'
+
+  GetUserPollsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-GetUserPollsFunction'
+      CodeUri: functions/polls/
+      Handler: getUserPolls.handler
+      Description: Get all polls created by authenticated user
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref EncuestaFlashTable
+      Tags:
+        Function: GetUserPolls
+        Phase: '2.3'
+
+  GetPollFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-GetPollFunction'
+      CodeUri: functions/polls/
+      Handler: getPoll.handler
+      Description: Get poll details by ID (public)
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref EncuestaFlashTable
+      Tags:
+        Function: GetPoll
+        Phase: '2.3'
+
+  VoteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-VoteFunction'
+      CodeUri: functions/polls/
+      Handler: vote.handler
+      Description: Register vote in poll (public, anonymous)
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref EncuestaFlashTable
+      Tags:
+        Function: Vote
+        Phase: '2.3'
+
+  GetResultsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-GetResultsFunction'
+      CodeUri: functions/polls/
+      Handler: getResults.handler
+      Description: Get poll results with vote statistics (public)
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref EncuestaFlashTable
+      Tags:
+        Function: GetResults
+        Phase: '2.3'
+
+  # ==========================================
+  # Placeholder para Fase 4
+  # ==========================================
+
   # Fase 4: WebSocket Functions
   # - ConnectFunction, DisconnectFunction, DefaultFunction, BroadcastFunction
 
