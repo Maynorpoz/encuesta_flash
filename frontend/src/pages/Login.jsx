@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../utils/api.js';
+import { LogIn } from 'lucide-react';
 
 export default function Login({ navigate, onAuthSuccess }) {
   const [username, setUsername] = useState('');
@@ -78,7 +79,12 @@ export default function Login({ navigate, onAuthSuccess }) {
             style={{ width: '100%', marginTop: '0.5rem' }}
             disabled={loading}
           >
-            {loading ? 'Ingresando...' : 'Iniciar Sesión 🔑'}
+            {loading ? 'Ingresando...' : (
+              <>
+                <LogIn size={18} style={{ marginRight: '0.5rem' }} />
+                Iniciar Sesión
+              </>
+            )}
           </button>
         </form>
 

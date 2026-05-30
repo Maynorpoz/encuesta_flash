@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../utils/api.js';
+import { PlusCircle, Vote, Eye } from 'lucide-react';
 
 export default function Dashboard({ navigate, user }) {
   const [polls, setPolls] = useState([]);
@@ -50,7 +51,8 @@ export default function Dashboard({ navigate, user }) {
           </p>
         </div>
         <button className="btn btn-primary" onClick={() => navigate('#/create')}>
-          Nueva Encuesta ➕
+          <PlusCircle size={16} style={{ marginRight: '0.5rem' }} />
+          Nueva Encuesta
         </button>
       </div>
 
@@ -89,7 +91,8 @@ export default function Dashboard({ navigate, user }) {
             No has creado ninguna encuesta todavía. ¡Comienza creando tu primera encuesta!
           </p>
           <button className="btn btn-primary" onClick={() => navigate('#/create')}>
-            Crear Encuesta Ahora 🚀
+            <PlusCircle size={18} style={{ marginRight: '0.5rem' }} />
+            Crear Encuesta Ahora
           </button>
         </div>
       ) : (
@@ -108,14 +111,16 @@ export default function Dashboard({ navigate, user }) {
                     style={{ flex: 1 }}
                     onClick={() => navigate(`#/poll/${poll.id}`)}
                   >
-                    Votar 🗳️
+                    <Vote size={16} style={{ marginRight: '0.4rem' }} />
+                    Votar
                   </button>
                   <button 
                     className="btn btn-primary btn-sm" 
                     style={{ flex: 1 }}
                     onClick={() => navigate(`#/poll/${poll.id}/results`)}
                   >
-                    Ver Resultados 📈
+                    <Eye size={16} style={{ marginRight: '0.4rem' }} />
+                    Ver Resultados
                   </button>
                 </div>
 

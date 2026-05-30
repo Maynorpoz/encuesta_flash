@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../utils/api.js';
+import { Vote as VoteIcon, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function Vote({ navigate, pollId }) {
   const [poll, setPoll] = useState(null);
@@ -67,8 +68,8 @@ export default function Vote({ navigate, pollId }) {
     return (
       <div className="vote-container">
         <div className="glass-card" style={{ textAlign: 'center' }}>
-          <span style={{ fontSize: '3rem' }}>⚠️</span>
-          <h2 className="hero-title" style={{ fontSize: '1.75rem', marginTop: '1rem', marginBottom: '1rem' }}>
+          <AlertCircle size={64} style={{ color: 'var(--error)', margin: '0 auto 1rem' }} />
+          <h2 className="hero-title" style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>
             Error al Cargar Encuesta
           </h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{error}</p>
@@ -95,7 +96,8 @@ export default function Vote({ navigate, pollId }) {
       ) : (
         <div className="glass-card">
           <div className="results-badge-live" style={{ background: 'rgba(99, 102, 241, 0.1)', color: '#a5b4fc', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: '1rem' }}>
-            Votación Pública Activa 🗳️
+            <VoteIcon size={16} style={{ marginRight: '0.5rem' }} />
+            Votación Pública Activa
           </div>
           
           <h1 className="hero-title" style={{ fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'left' }}>
@@ -109,7 +111,8 @@ export default function Vote({ navigate, pollId }) {
 
           {error && (
             <div className="alert alert-danger">
-              <span>⚠️</span> {error}
+              <AlertCircle size={16} style={{ marginRight: '0.5rem' }} />
+              {error}
             </div>
           )}
 
@@ -143,7 +146,12 @@ export default function Vote({ navigate, pollId }) {
                 style={{ flex: 2 }}
                 disabled={voting || !selectedOption}
               >
-                {voting ? 'Registrando...' : 'Emitir Voto 🗳️'}
+                {voting ? 'Registrando...' : (
+                  <>
+                    <VoteIcon size={18} style={{ marginRight: '0.5rem' }} />
+                    Emitir Voto
+                  </>
+                )}
               </button>
             </div>
           </form>

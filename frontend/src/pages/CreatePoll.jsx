@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../utils/api.js';
+import { Vote, BarChart3, PlusCircle, Check, Rocket } from 'lucide-react';
 
 export default function CreatePoll({ navigate, user }) {
   const [title, setTitle] = useState('');
@@ -103,7 +104,10 @@ export default function CreatePoll({ navigate, user }) {
 
             {/* Enlace para votar */}
             <div style={{ marginBottom: '1.25rem' }}>
-              <label className="form-label" style={{ fontWeight: '600' }}>Enlace para Votar 🗳️</label>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <Vote size={18} style={{ marginRight: '0.5rem', color: 'var(--primary)' }} />
+                <label className="form-label" style={{ fontWeight: '600', margin: 0 }}>Enlace para Votar</label>
+              </div>
               <div className="share-section">
                 <span className="share-url">{voteLink}</span>
                 <button 
@@ -117,7 +121,10 @@ export default function CreatePoll({ navigate, user }) {
 
             {/* Enlace para resultados */}
             <div>
-              <label className="form-label" style={{ fontWeight: '600' }}>Enlace de Resultados en Vivo 📊</label>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <BarChart3 size={18} style={{ marginRight: '0.5rem', color: 'var(--accent)' }} />
+                <label className="form-label" style={{ fontWeight: '600', margin: 0 }}>Enlace de Resultados en Vivo</label>
+              </div>
               <div className="share-section">
                 <span className="share-url">{resultsLink}</span>
                 <button 
@@ -224,7 +231,8 @@ export default function CreatePoll({ navigate, user }) {
                 onClick={addOptionField}
                 disabled={loading}
               >
-                Agregar Opción ➕
+                <PlusCircle size={16} style={{ marginRight: '0.4rem' }} />
+                Agregar Opción
               </button>
             )}
           </div>
@@ -273,7 +281,12 @@ export default function CreatePoll({ navigate, user }) {
               style={{ flex: 2 }}
               disabled={loading}
             >
-              {loading ? 'Publicando...' : 'Crear Encuesta Serverless 🚀'}
+              {loading ? 'Publicando...' : (
+                <>
+                  <Rocket size={18} style={{ marginRight: '0.5rem' }} />
+                  Crear Encuesta Serverless
+                </>
+              )}
             </button>
           </div>
         </form>

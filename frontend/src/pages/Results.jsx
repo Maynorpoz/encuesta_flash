@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../utils/api.js';
+import { Vote, LayoutDashboard, Check } from 'lucide-react';
 
 export default function Results({ navigate, pollId }) {
   const [resultsData, setResultsData] = useState(null);
@@ -147,17 +148,26 @@ export default function Results({ navigate, pollId }) {
           <div className="share-section">
             <span className="share-url">{shareLink}</span>
             <button className="btn btn-primary btn-sm" onClick={handleCopyLink}>
-              {copied ? '¡Copiado! ✓' : 'Copiar Enlace'}
+              {copied ? (
+                <>
+                  <Check size={16} style={{ marginRight: '0.3rem' }} />
+                  ¡Copiado!
+                </>
+              ) : (
+                'Copiar Enlace'
+              )}
             </button>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => navigate(`#/poll/${pollId}`)}>
-            Volver a Votar 🗳️
+            <Vote size={18} style={{ marginRight: '0.5rem' }} />
+            Volver a Votar
           </button>
           <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => navigate('#/dashboard')}>
-            Ir a mi Panel 📊
+            <LayoutDashboard size={18} style={{ marginRight: '0.5rem' }} />
+            Ir a mi Panel
           </button>
         </div>
       </div>

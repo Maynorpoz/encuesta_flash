@@ -1,4 +1,5 @@
 import React from 'react';
+import { LayoutDashboard, UserPlus, LogIn, PlusCircle, Share2, BarChart3 } from 'lucide-react';
 
 export default function Home({ navigate, user }) {
   return (
@@ -11,18 +12,21 @@ export default function Home({ navigate, user }) {
         <p className="hero-subtitle">
           Crea encuestas al instante, comparte con un enlace y observa los resultados cambiar en tiempo real con tecnología Serverless.
         </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           {user ? (
             <button className="btn btn-primary" onClick={() => navigate('#/dashboard')}>
-              Ir a mi Panel 📊
+              <LayoutDashboard size={18} style={{ marginRight: '0.5rem' }} />
+              Ir a mi Panel
             </button>
           ) : (
             <>
               <button className="btn btn-primary" onClick={() => navigate('#/register')}>
-                Comenzar Gratis 🚀
+                <UserPlus size={18} style={{ marginRight: '0.5rem' }} />
+                Comenzar Gratis
               </button>
               <button className="btn btn-secondary" onClick={() => navigate('#/login')}>
-                Iniciar Sesión 🔑
+                <LogIn size={18} style={{ marginRight: '0.5rem' }} />
+                Iniciar Sesión
               </button>
             </>
           )}
@@ -31,25 +35,34 @@ export default function Home({ navigate, user }) {
 
       <div className="glass-card" style={{ maxWidth: '850px', margin: '0 auto 3rem' }}>
         <h2 className="hero-title" style={{ fontSize: '2rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-          ¿Por qué Serverless es ideal aquí?
+          ¿Cómo funciona Votify?
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
           <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
-            <h3 style={{ fontFamily: 'var(--font-title)', color: 'var(--accent)', marginBottom: '0.5rem' }}>⚡ Escalabilidad Infinita</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <PlusCircle size={20} style={{ color: 'var(--accent)', marginRight: '0.5rem' }} />
+              <h3 style={{ fontFamily: 'var(--font-title)', color: 'var(--accent)', margin: 0 }}>Crea tu encuesta</h3>
+            </div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              ¿Tu encuesta se volvió viral? El sistema escala de forma automática para soportar miles de votos por segundo sin inmutarse.
+              Define tu pregunta y hasta 10 opciones de respuesta. El sistema genera un enlace único listo para compartir en segundos.
             </p>
           </div>
           <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
-            <h3 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', marginBottom: '0.5rem' }}>💸 Costo Eficiente</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <Share2 size={20} style={{ color: 'var(--primary)', marginRight: '0.5rem' }} />
+              <h3 style={{ fontFamily: 'var(--font-title)', color: 'var(--primary)', margin: 0 }}>Comparte y recolecta votos</h3>
+            </div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              Al usar funciones independientes en la nube, solo pagas cuando un usuario vota o crea una encuesta. $0 costo cuando está inactivo.
+              Copia el enlace y compártelo por redes sociales, email o WhatsApp. Los usuarios votan sin necesidad de crear cuenta.
             </p>
           </div>
           <div style={{ padding: '1rem', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
-            <h3 style={{ fontFamily: 'var(--font-title)', color: '#22c55e', marginBottom: '0.5rem' }}>🕒 Tiempo Real Nativo</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <BarChart3 size={20} style={{ color: '#22c55e', marginRight: '0.5rem' }} />
+              <h3 style={{ fontFamily: 'var(--font-title)', color: '#22c55e', margin: 0 }}>Resultados en vivo</h3>
+            </div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              Los votos activan disparadores serverless que empujan las actualizaciones a todos los navegadores conectados vía WebSockets.
+              Observa las gráficas actualizarse automáticamente cada vez que alguien vota. Tecnología WebSocket para actualizaciones instantáneas.
             </p>
           </div>
         </div>

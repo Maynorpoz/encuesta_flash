@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../utils/api.js';
+import { UserPlus } from 'lucide-react';
 
 export default function Register({ navigate, onAuthSuccess }) {
   const [username, setUsername] = useState('');
@@ -103,7 +104,12 @@ export default function Register({ navigate, onAuthSuccess }) {
             style={{ width: '100%', marginTop: '0.5rem' }}
             disabled={loading}
           >
-            {loading ? 'Creando cuenta...' : 'Registrar Cuenta 🚀'}
+            {loading ? 'Creando cuenta...' : (
+              <>
+                <UserPlus size={18} style={{ marginRight: '0.5rem' }} />
+                Registrar Cuenta
+              </>
+            )}
           </button>
         </form>
 

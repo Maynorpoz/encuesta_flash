@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import CreatePoll from './pages/CreatePoll.jsx';
 import Vote from './pages/Vote.jsx';
 import Results from './pages/Results.jsx';
+import { BarChart3, LogOut } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState(api.getUser());
@@ -109,14 +110,16 @@ export default function App() {
       {/* Navegación Principal */}
       <header className="navbar">
         <a href="#/" className="logo" onClick={(e) => { e.preventDefault(); navigate(user ? '#/dashboard' : '#/'); }}>
-          <span className="logo-emoji">📊</span> Votify
+          <BarChart3 size={24} style={{ marginRight: '0.5rem' }} />
+          Votify
         </a>
         <nav className="nav-links">
           {user ? (
             <div className="nav-user">
-              <span className="username-tag">👤 {user.username}</span>
+              <span className="username-tag">{user.username}</span>
               <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
-                Cerrar Sesión 🚪
+                <LogOut size={16} style={{ marginRight: '0.4rem' }} />
+                Cerrar Sesión
               </button>
             </div>
           ) : (
