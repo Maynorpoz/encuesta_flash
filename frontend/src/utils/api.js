@@ -1,5 +1,5 @@
-const API_BASE = 'http://localhost:5000/api';
-const WS_BASE = 'ws://localhost:5000/ws';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const WS_BASE = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:3001';
 
 export const api = {
   // Guardar token en localStorage
@@ -110,7 +110,7 @@ export const api = {
     socket.onopen = () => {
       console.log(`[WS CONNECTED] Suscribiendo a encuesta: ${pollId}`);
       socket.send(JSON.stringify({
-        type: 'subscribe',
+        action: 'subscribe',
         pollId
       }));
     };
