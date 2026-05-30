@@ -131,11 +131,21 @@ Resources:
       StageName: prod
       Cors:
         AllowOrigin: "'*'"
-        AllowHeaders: "'Content-Type,Authorization'"
+        AllowHeaders: "'Content-Type,Authorization,X-Requested-With,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
-        AllowCredentials: false
+        MaxAge: "'600'"
+      GatewayResponses:
+        DEFAULT_4XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Requested-With,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        DEFAULT_5XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Requested-With,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
       Auth:
-        DefaultAuthorizer: JWTAuthorizer
         Authorizers:
           JWTAuthorizer:
             FunctionArn: !GetAtt AuthorizerFunction.Arn
@@ -228,6 +238,8 @@ Resources:
             RestApiId: !Ref EncuestaFlashApi
             Path: /polls
             Method: POST
+            Auth:
+              Authorizer: JWTAuthorizer
       Tags:
         Function: CreatePoll
         Phase: '2.3'
@@ -249,6 +261,8 @@ Resources:
             RestApiId: !Ref EncuestaFlashApi
             Path: /polls/me
             Method: GET
+            Auth:
+              Authorizer: JWTAuthorizer
       Tags:
         Function: GetUserPolls
         Phase: '2.3'
