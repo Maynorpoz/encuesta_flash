@@ -155,12 +155,23 @@ Resources:
         Function: Login
         Phase: '2.1'
 
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-AuthorizerFunction'
+      CodeUri: functions/auth/
+      Handler: authorizer.handler
+      Description: JWT token validator for API Gateway authorization
+      # No necesita acceso a DynamoDB, solo valida JWT
+      Tags:
+        Function: Authorizer
+        Phase: '2.2'
+
   # ==========================================
   # Placeholder para más funciones Lambda
   # ==========================================
 
-  # Próximas funciones (Fase 2.2 - 2.3):
-  # - AuthorizerFunction (Lambda Authorizer)
+  # Próximas funciones (Fase 2.3):
   # - CreatePollFunction, GetPollFunction, GetUserPollsFunction
   # - VoteFunction, GetResultsFunction
   #
