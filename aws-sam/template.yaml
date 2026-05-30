@@ -176,8 +176,6 @@ Resources:
             RestApiId: !Ref EncuestaFlashApi
             Path: /auth/register
             Method: POST
-            Auth:
-              Authorizer: NONE
       Tags:
         Function: Register
         Phase: '2.1'
@@ -199,8 +197,6 @@ Resources:
             RestApiId: !Ref EncuestaFlashApi
             Path: /auth/login
             Method: POST
-            Auth:
-              Authorizer: NONE
       Tags:
         Function: Login
         Phase: '2.1'
@@ -284,8 +280,6 @@ Resources:
             RestApiId: !Ref EncuestaFlashApi
             Path: /polls/{pollId}
             Method: GET
-            Auth:
-              Authorizer: NONE
       Tags:
         Function: GetPoll
         Phase: '2.3'
@@ -307,8 +301,6 @@ Resources:
             RestApiId: !Ref EncuestaFlashApi
             Path: /polls/vote
             Method: POST
-            Auth:
-              Authorizer: NONE
       Tags:
         Function: Vote
         Phase: '2.3'
@@ -330,8 +322,6 @@ Resources:
             RestApiId: !Ref EncuestaFlashApi
             Path: /polls/{pollId}/results
             Method: GET
-            Auth:
-              Authorizer: NONE
       Tags:
         Function: GetResults
         Phase: '2.3'

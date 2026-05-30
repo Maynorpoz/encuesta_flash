@@ -48,10 +48,12 @@ export const handler = async (event) => {
     }
 
     // Generar IAM Policy - ALLOW
+    // Usar wildcard para permitir todos los métodos del API
+    const apiArn = event.methodArn.split('/').slice(0, 2).join('/') + '/*';
     const policy = generatePolicy(
       decoded.userId,
       'Allow',
-      event.methodArn,
+      apiArn,
       {
         userId: decoded.userId,
         username: decoded.username

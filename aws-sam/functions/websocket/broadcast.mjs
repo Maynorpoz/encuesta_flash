@@ -45,9 +45,8 @@ export const handler = async (event) => {
       });
 
       const message = JSON.stringify({
-        type: 'results',
-        pollId,
-        results
+        type: 'results_update',
+        data: results
       });
 
       const staleConnections = [];

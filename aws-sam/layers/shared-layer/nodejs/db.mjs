@@ -466,16 +466,22 @@ class Database {
     const timestamp = Date.now();
     const ttl = Math.floor(timestamp / 1000) + 3600; // 1 hora
 
+    const item = {
+      PK: `CONNECTION#${connectionId}`,
+      SK: 'METADATA',
+      connectionId,
+      timestamp,
+      ttl
+    };
+
+    // Solo agregar pollId si no es null (evita error en GSI PollIdIndex)
+    if (pollId) {
+      item.pollId = pollId;
+    }
+
     await docClient.send(new PutCommand({
       TableName: this.tableName,
-      Item: {
-        PK: `CONNECTION#${connectionId}`,
-        SK: 'METADATA',
-        connectionId,
-        pollId,
-        timestamp,
-        ttl
-      }
+      Item: item
     }));
   }
 
@@ -524,11 +530,14 @@ class Database {
         }
       }));
 
-      return (result.Items || []).map(item => ({
-        connectionId: item.connectionId,
-        pollId: item.pollId,
-        timestamp: item.timestamp
-      }));
+      // Filtrar solo las conexiones (PK empieza con CONNECTION#)
+      return (result.Items || [])
+        .filter(item => item.PK && item.PK.startsWith('CONNECTION#'))
+        .map(item => ({
+          connectionId: item.connectionId,
+          pollId: item.pollId,
+          timestamp: item.timestamp
+        }));
     } catch (error) {
       console.error('Error getting connections by poll ID:', error);
       return [];
