@@ -394,6 +394,39 @@ Resources:
         Function: WebSocketDefault
         Phase: '4.2'
 
+  BroadcastFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-BroadcastFunction'
+      CodeUri: functions/websocket/
+      Handler: broadcast.handler
+      Description: Broadcast poll results to subscribed WebSocket connections
+      Environment:
+        Variables:
+          WEBSOCKET_API_ID: !Ref EncuestaFlashWebSocketApi
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref EncuestaFlashTable
+        - Statement:
+          - Effect: Allow
+            Action:
+              - execute-api:ManageConnections
+            Resource:
+              - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${EncuestaFlashWebSocketApi}/*'
+      Events:
+        DynamoDBStream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt EncuestaFlashTable.StreamArn
+            StartingPosition: LATEST
+            BatchSize: 10
+            FilterCriteria:
+              Filters:
+                - Pattern: '{"eventName": ["INSERT"], "dynamodb": {"NewImage": {"SK": {"S": [{"prefix": "VOTE#"}]}}}}'
+      Tags:
+        Function: WebSocketBroadcast
+        Phase: '4.3'
+
   # ==========================================
   # WebSocket Routes
   # ==========================================
