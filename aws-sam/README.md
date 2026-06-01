@@ -2,6 +2,53 @@
 
 Este directorio contiene la infraestructura serverless AWS SAM para el proyecto Votify.
 
+## 🚀 Referencia Rápida de Comandos SAM
+
+### Deploy Completo (desde cero)
+```bash
+# 1. Instalar dependencias
+cd layers/shared-layer/nodejs && npm install && cd ../../..
+
+# 2. Validar template
+sam validate
+
+# 3. Build
+sam build
+
+# 4. Deploy (primera vez)
+sam deploy --guided
+
+# 5. Deploys posteriores
+sam build && sam deploy
+```
+
+### Comandos Más Usados
+```bash
+# Ver logs en tiempo real
+sam logs -n <NombreFuncion> --tail
+
+# Invocar función en AWS
+sam remote invoke <NombreFuncion> --stack-name encuesta-flash-serverless
+
+# Ver outputs del stack (URLs)
+sam list stack-outputs --stack-name encuesta-flash-serverless
+
+# Eliminar todo
+sam delete
+```
+
+### Desarrollo Local
+```bash
+# Iniciar API local
+sam local start-api
+
+# Invocar función localmente
+sam local invoke <NombreFuncion> -e events/test.json
+
+# Sync rápido (desarrollo)
+sam sync --stack-name encuesta-flash-serverless --watch
+```
+
 ## Estructura del Proyecto
 
 ```
@@ -110,44 +157,375 @@ Para funciones específicas:
 }
 ```
 
-## Deploy a AWS (Fase 6)
+## Deploy a AWS - Guía Completa
 
-### Primera vez (configuración guiada)
+### Prerequisitos
+
+Antes de hacer deploy, asegúrate de tener:
 
 ```bash
+# 1. AWS CLI instalado y configurado
+aws --version
+aws configure list
+
+# 2. SAM CLI instalado
+sam --version
+
+# 3. Docker corriendo (para builds)
+docker ps
+```
+
+Si AWS CLI no está configurado:
+
+```bash
+aws configure
+# AWS Access Key ID: [Tu Access Key]
+# AWS Secret Access Key: [Tu Secret Key]
+# Default region: us-east-1
+# Default output format: json
+```
+
+### Paso 1: Instalar Dependencias del Layer
+
+**IMPORTANTE:** Siempre instala las dependencias del layer antes de hacer build.
+
+```bash
+# Navegar al directorio del layer
+cd layers/shared-layer/nodejs
+
+# Instalar dependencias
+npm install
+
+# Verificar que node_modules existe
+ls -la node_modules | head
+
+# Volver al directorio raíz de SAM
+cd ../../..
+```
+
+### Paso 2: Validar Template
+
+Antes de hacer build, valida que el template esté correcto:
+
+```bash
+# Validar sintaxis del template.yaml
+sam validate
+
+# Si hay errores, aparecerán aquí
+# Si está correcto, dirá: "template.yaml is a valid SAM Template"
+```
+
+### Paso 3: Build del Proyecto
+
+El comando `sam build` compila y prepara tu aplicación para deploy:
+
+```bash
+# Build básico (recomendado)
 sam build
+
+# Build con contenedores Docker (más lento pero más preciso)
+sam build --use-container
+
+# Build en paralelo (más rápido)
+sam build --parallel
+```
+
+Qué hace `sam build`:
+- Empaqueta cada función Lambda
+- Copia las dependencias del Layer
+- Genera archivos en `.aws-sam/build/`
+- Prepara el template para CloudFormation
+
+**Salida esperada:**
+```
+Build Succeeded
+
+Built Artifacts  : .aws-sam/build
+Built Template   : .aws-sam/build/template.yaml
+
+Commands you can use next
+=========================
+[*] Invoke Function: sam local invoke
+[*] Deploy: sam deploy --guided
+```
+
+### Paso 4: Deploy - Primera Vez (Configuración Guiada)
+
+La primera vez que haces deploy, usa `--guided`:
+
+```bash
 sam deploy --guided
 ```
 
-Responder:
-- Stack Name: `encuesta-flash-serverless`
-- AWS Region: `us-east-1` (o la que prefieras)
-- Confirm changes: `Y`
-- Allow SAM CLI IAM role creation: `Y`
-- Disable rollback: `N`
-- Save arguments to config: `Y`
+**Configuración interactiva paso a paso:**
 
-### Deploys subsecuentes
+```
+Setting default arguments for 'sam deploy'
+=========================================
 
-```bash
-sam build && sam deploy
+Stack Name [sam-app]: encuesta-flash-serverless
+AWS Region [us-east-1]: us-east-1
+Parameter Environment [development]: development
+Parameter JWTSecret []: secret-key-para-encuestas-serverless-2026
+
+#Shows you resources changes to be deployed and require a 'Y' to initiate deploy
+Confirm changes before deploy [y/N]: Y
+
+#SAM needs permission to be able to create roles to connect to the resources in your template
+Allow SAM CLI IAM role creation [Y/n]: Y
+
+#Preserves the state of previously provisioned resources when an operation fails
+Disable rollback [y/N]: N
+
+Save arguments to configuration file [Y/n]: Y
+SAM configuration file [samconfig.toml]: samconfig.toml
+SAM configuration environment [default]: default
 ```
 
-### Ver Logs
+**Qué pasa durante el deploy:**
+
+1. **Package:** Sube código a S3
+   ```
+   Uploading to a482226affc8e9af22f24340ca52fc93  36364150 / 36364150  (100.00%)
+   ```
+
+2. **CreateChangeSet:** Prepara cambios de CloudFormation
+   ```
+   Waiting for changeset to be created..
+   ```
+
+3. **ExecuteChangeSet:** Aplica los cambios
+   ```
+   CloudFormation events from stack operations
+   CREATE_IN_PROGRESS  AWS::Lambda::LayerVersion  SharedLayer
+   CREATE_COMPLETE     AWS::Lambda::LayerVersion  SharedLayer
+   CREATE_IN_PROGRESS  AWS::Lambda::Function      RegisterFunction
+   ...
+   ```
+
+4. **Outputs:** Muestra URLs y ARNs
+   ```
+   Key                 ApiEndpoint
+   Value               https://f81brf5js6.execute-api.us-east-1.amazonaws.com/prod
+
+   Key                 WebSocketEndpoint
+   Value               wss://7yrl08ar38.execute-api.us-east-1.amazonaws.com/prod
+   ```
+
+### Paso 5: Deploys Subsecuentes
+
+Después del primer deploy, simplemente:
 
 ```bash
-# Logs de una función específica
+# Build + Deploy en un solo comando
+sam build && sam deploy
+
+# O con confirmación automática
+sam build && echo "y" | sam deploy
+```
+
+### Paso 6: Verificar el Deploy
+
+```bash
+# Ver el estado del stack
+aws cloudformation describe-stacks \
+  --stack-name encuesta-flash-serverless \
+  --query 'Stacks[0].StackStatus'
+
+# Listar todos los outputs (URLs, ARNs, etc)
+aws cloudformation describe-stacks \
+  --stack-name encuesta-flash-serverless \
+  --query 'Stacks[0].Outputs'
+
+# Ver recursos creados
+aws cloudformation list-stack-resources \
+  --stack-name encuesta-flash-serverless
+```
+
+### Comandos SAM Útiles Post-Deploy
+
+#### Ver Logs en Tiempo Real
+
+```bash
+# Logs de una función específica (con tail)
 sam logs -n RegisterFunction --tail
+
+# Logs desde hace 10 minutos
+sam logs -n RegisterFunction --start-time '10min ago'
+
+# Logs con filtro
+sam logs -n RegisterFunction --filter ERROR
 
 # Logs de todas las funciones
 sam logs --tail
+
+# Logs de Lambda + API Gateway
+sam logs -n RegisterFunction --include-traces
 ```
 
-### Eliminar Stack
+#### Invocar Funciones en AWS
 
 ```bash
-sam delete
+# Invocar función deployada en AWS
+sam remote invoke RegisterFunction \
+  --stack-name encuesta-flash-serverless \
+  --event-file events/register-event.json
+
+# Ver el resultado directamente
+sam remote invoke RegisterFunction \
+  --stack-name encuesta-flash-serverless \
+  --event '{"body":"{\"username\":\"test\",\"password\":\"test123\"}"}'
 ```
+
+#### Sincronización Rápida (Para Desarrollo)
+
+```bash
+# Sync code changes sin rebuild completo
+sam sync --stack-name encuesta-flash-serverless --watch
+
+# Solo código (sin cambios de infraestructura)
+sam sync --code --stack-name encuesta-flash-serverless
+```
+
+#### Ver Información del Stack
+
+```bash
+# Lista todos los stacks
+sam list stack-outputs --stack-name encuesta-flash-serverless
+
+# Ver endpoints
+sam list endpoints --stack-name encuesta-flash-serverless
+
+# Ver recursos
+sam list resources --stack-name encuesta-flash-serverless
+```
+
+### Actualizar Stack (Cambios en template.yaml)
+
+Cuando modificas `template.yaml`:
+
+```bash
+# 1. Rebuild
+sam build
+
+# 2. Ver qué va a cambiar
+sam deploy --no-execute-changeset
+
+# 3. Aplicar cambios
+sam deploy
+
+# O todo junto con confirmación
+sam build && sam deploy
+```
+
+### Rollback de un Deploy
+
+Si algo sale mal:
+
+```bash
+# Opción 1: Rollback manual desde consola AWS
+# Stack → Actions → Rollback
+
+# Opción 2: Eliminar y redesplegar
+sam delete
+sam build && sam deploy --guided
+
+# Opción 3: Deploy de versión anterior
+git checkout <commit-anterior>
+sam build && sam deploy
+```
+
+### Eliminar Stack Completo
+
+```bash
+# Eliminar todo (stack, funciones, API Gateway, DynamoDB, etc)
+sam delete
+
+# O con confirmación automática
+echo "y" | sam delete
+
+# Verificar que se eliminó
+aws cloudformation describe-stacks \
+  --stack-name encuesta-flash-serverless
+# Debe dar error: "Stack with id encuesta-flash-serverless does not exist"
+```
+
+**⚠️ ADVERTENCIA:** `sam delete` elimina:
+- Todas las Lambda Functions
+- API Gateway (REST + WebSocket)
+- DynamoDB Table (¡y todos los datos!)
+- Lambda Layers
+- Roles IAM
+- CloudWatch Logs
+
+### Troubleshooting de Deploy
+
+#### Error: "Unable to upload artifact"
+
+```bash
+# Solución: Rebuild limpio
+rm -rf .aws-sam
+sam build
+sam deploy
+```
+
+#### Error: "No changes to deploy"
+
+```bash
+# Forzar redesploy
+sam deploy --force-upload
+```
+
+#### Error: "Stack is in UPDATE_ROLLBACK_FAILED state"
+
+```bash
+# Continuar rollback
+aws cloudformation continue-update-rollback \
+  --stack-name encuesta-flash-serverless
+
+# Esperar a que complete
+aws cloudformation wait stack-rollback-complete \
+  --stack-name encuesta-flash-serverless
+
+# Luego redesplegar
+sam build && sam deploy
+```
+
+#### Error: "Rate exceeded" (demasiadas peticiones)
+
+```bash
+# Esperar 1 minuto y reintentar
+sleep 60 && sam deploy
+```
+
+### Mejores Prácticas
+
+1. **Siempre hacer build antes de deploy**
+   ```bash
+   sam build && sam deploy
+   ```
+
+2. **Verificar cambios antes de aplicarlos**
+   ```bash
+   sam deploy --confirm-changeset
+   ```
+
+3. **Usar parámetros para diferentes ambientes**
+   ```bash
+   sam deploy --parameter-overrides Environment=production
+   ```
+
+4. **Mantener backups de DynamoDB**
+   ```bash
+   aws dynamodb create-backup \
+     --table-name EncuestaFlashTable-development \
+     --backup-name backup-$(date +%Y%m%d)
+   ```
+
+5. **Usar tags para organizar recursos**
+   ```bash
+   sam deploy --tags "Project=Votify Environment=Production"
+   ```
 
 ## Scripts Útiles
 
@@ -290,11 +668,31 @@ sam build --use-container
   - [x] DynamoDB Local funcionando
   - [x] Scripts de migración
 
-- [ ] **FASE 2:** Core Lambda Functions (En progreso...)
-- [ ] **FASE 3:** API Gateway REST API
-- [ ] **FASE 4:** WebSocket API
-- [ ] **FASE 5:** Frontend Integration
+- [x] **FASE 2:** Core Lambda Functions ✅
+  - [x] Funciones de autenticación (register, login, authorizer)
+  - [x] Funciones CRUD de polls
+  - [x] Integración con DynamoDB
+
+- [x] **FASE 3:** API Gateway REST API ✅
+  - [x] Configuración de rutas
+  - [x] CORS configurado
+  - [x] Lambda Authorizer integrado
+
+- [x] **FASE 4:** WebSocket API ✅
+  - [x] Conexiones WebSocket (connect, disconnect, default)
+  - [x] DynamoDB Streams trigger
+  - [x] Broadcast en tiempo real funcionando
+
+- [x] **FASE 5:** Frontend Integration ✅
+  - [x] Frontend actualizado con iconos Lucide
+  - [x] Variables de entorno configuradas
+  - [x] Deploy a Netlify
+  - [x] WebSocket en tiempo real operativo
+
 - [ ] **FASE 6:** Deploy & Cleanup
+  - [ ] Documentación final
+  - [ ] Monitoreo configurado
+  - [ ] Backend local eliminado
 
 ## Recursos
 
@@ -331,5 +729,5 @@ aws cloudwatch get-metric-statistics \
 
 ---
 
-**Última actualización:** 2026-05-27
-**Estado:** Fase 1 completada ✅
+**Última actualización:** 2026-05-30
+**Estado:** Fases 1-5 completadas ✅ | Sistema 100% funcional en AWS + Netlify
